@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    container_name: aquaplant_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./telemetry.db:/app/telemetry.db
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  emulator:
+    build: .
+    container_name: aquaplant_emulator
+    command: python emulator.py
+    depends_on:
+      backend:
+        condition: service_healthy
